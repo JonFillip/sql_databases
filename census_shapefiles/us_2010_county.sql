@@ -19,6 +19,17 @@ SELECT name10,
 FROM us_counties_2010_shp
 ORDER BY landmass_per_squaremiles DESC;
 
+-- Finding the landmass of each state using ST_Area() Function
+
+SELECT statefp10 AS st,
+		SUM(
+			ROUND(
+				(ST_Area(geom::geography) / 2589988.110336)::numeric, 2
+			)) AS state_total_landmass_sqmiles
+FROM us_counties_2010_shp
+GROUP BY st
+ORDER BY state_total_landmass_sqmiles DESC;
+
 -- Finding a County by Longitude and Latitude
 
 SELECT name10,

@@ -78,3 +78,39 @@ WITH ST_DWithin(
     25000
 )
 ORDER BY miles_from_distination ASC;
+
+-- Finding the distance in miles between The Oakleaf Market and Columbia Farmers Market
+
+WITH market_a(market_name, geog_point) AS (
+	SELECT market_name,
+			geog_point
+	FROM farmers_market
+	WHERE market_name = 'The Oakleaf Greenmarket'
+),
+market_b(market_name, geog_point) AS (
+	SELECT market_name,
+			geog_point
+	FROM farmers_market
+	WHERE market_name = 'Columbia Farmers Market'
+)
+SELECT ST_Distance(market_a.geog_point, market_b.geog_point) /  1609.344 AS distance_btw_miles
+FROM market_a, market_b;
+
+-- More than 500 rows in the farmers_markets table are missing a value
+-- in the county column, an example of dirty government data. Using the
+-- us_counties_2010_shp table and the ST_Intersects() function, perform a
+-- spatial join to find the missing county names based on the longitude and
+-- latitude of each market. Because geog_point in farmers_markets is of the
+-- geography type and its SRID is 4326, you’ll need to cast geom in the Census
+-- table to the geography type and change its SRID using ST_SetSRID().
+
+
+SELECT boundaries.name10,
+		boundaries.statefp10,
+		markets.market_name,
+		markets.county,
+		markets.st
+FROM us_counties_2010_shp AS boundaries JOIN farmers_market AS markets
+ON ST_Intersects(ST_SetSRID(boundaries.geom, 4326), markets.geog_point)
+WHERE markets.county IS NULL
+ORDER BY boundaries.name10, boundaries.statefp10;
