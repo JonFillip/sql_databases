@@ -159,3 +159,14 @@ SELECT segment,
         arrival - departure AS segment_time,
         SUM(date_part('epoch', (arrival - departure))) OVER (ORDER BY trip_id) * INTERVAL '1 second' AS cume_time
 FROM train_rides;
+
+-- CREATING A VIEW FOR TRIPS PER HOUR
+CREATE VIEW nyc_taxi_trips_per_hour AS
+    SELECT
+        date_part('hour', tpep_pickup_datetime),
+        count(date_part('hour', tpep_pickup_datetime))
+    FROM nyc_yellow_taxi_trips_2016_06_01
+    GROUP BY date_part('hour', tpep_pickup_datetime)
+    ORDER BY date_part('hour', tpep_pickup_datetime);
+
+SELECT * FROM nyc_taxi_trips_per_hour;

@@ -307,3 +307,33 @@ FROM meat_poultry_egg_inspect
 WHERE meat_processing = 'TRUE' OR poultry_processing = 'TRUE'
 GROUP BY meat_processing, poultry_processing
 ORDER BY activity_count;
+
+-- ADD COLUMN FOR INSPECTION DATE
+ALTER TABLE meat_poultry_egg_inspect ADD COLUMN date_of_inspection DATE;
+
+-- Create the function that the trigger will execute.
+
+CREATE OR REPLACE FUNCTION add_inspection_date()
+    RETURNS trigger AS $$
+    BEGIN
+    	UPDATE meat_poultry_egg_inspect
+        SET inspection_date = now() + '6 months'::interval; -- Here, we set the inspection date to six months in the future
+    RETURN NEW;
+    END;
+$$ LANGUAGE plpgsql;
+
+-- Create the trigger
+
+CREATE TRIGGER inspection_date_update
+    AFTER INSERT
+    ON meat_poultry_egg_inspect
+    FOR EACH ROW
+    EXECUTE PROCEDURE add_inspection_date();
+
+-- Test the insertion of a company and examine the result
+
+INSERT INTO meat_poultry_egg_inspect(est_number, company)
+VALUES ('test123', 'testcompany');
+
+SELECT * FROM meat_poultry_egg_inspect
+WHERE company = 'testcompany';
