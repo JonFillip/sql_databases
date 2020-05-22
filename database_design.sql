@@ -189,3 +189,57 @@ ALTER TABLE table_name ADD CONSTRAINT constraint_name PRIMARY KEY (column_name)
 ALTER TABLE table_name ALTER COLUMN column_name DROP NOT NULL;
 -- To add a NOT NULL constraint, the statement operates on the column, so you must use the additional ALTER COLUMN keywords:
 ALTER TABLE table_name ALTER COLUMN column_name SET NOT NULL;
+
+-- TRACKING TABLE SIZE
+SELECT pg_size_pretty(
+    pg_total_relation_size(table_name)
+);
+
+-- Monitoring the autovacuum Process
+SELECT relname,
+        last_vacuum,
+        last_autovacuum,
+        vacuum_count
+FROM pg_stat_all_tables;
+
+-- Running VACUUM Manually
+VACUUM table_name;
+
+-- Running Table Size with VACUUM FULL
+VACUUM FULL table_name;
+
+-- LOCATING AND EDITING POSTGRESQL
+SHOW config_file;  -- Returns configuration file path
+
+-- CONNECTING DATABASE WITH COMMAND LINE
+psql -d database -U username
+
+-- CHANGING THE USER AND DATABASE CONNECTION
+\c database username
+
+-- SAVING QUERY OUTPUT IN A FILE
+\a \f, \pset footer -- First set the output format using meta-commands \a, \f and \pset footer for unaligned, comma seperated data with no footer
+
+SELECT (command) FROM table_name;
+
+\o '/Users/username/filelocation/filename' -- \o is a meta-command that is used to send the result of the query to the specified complete file path
+
+-- READING AND EXECUTING SQL STORED IN A FILE
+psql -d database -U user_name -f filename.sql
+
+-- ADDING A DATABASE WITH createdb
+createdb -U user_name -e database -- -e argument 'echo' tells terminal to print the SQL statement to the screen
+
+-- LOADING SHAPEFILES WITH shp2pgsql
+shp2pgsql -I -s SRID -W encoding shapefile_name table_name | psql -d database -U user
+
+-- RELOADING SETTINGS WITH pg_ctl USING COMMAND LIME
+pg_ctl reload -D '/Users/username/filelocation/file'
+
+-- USING pg_dump TO BACK UP A DATABASE OR TABLE (command line)
+pg_dump -d database -U username -Fc > backup_file.sql 
+
+pg_dump -t 'table_name' -d database -U username -Fc > backup_file.sql -- backs up a specific table in the database
+
+-- RESTORING A DATABASE BACKUP WITH pg_restore
+pg_restore -C -d postgres -U username backup_file.sql
